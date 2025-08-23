@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="edit-test-container">
+    <div class="edit-test-card">
+        <h2 class="card-title">
+            <i class="fa-solid fa-pen-to-square"></i> Тестті өзгерту: <span class="fw-bold">{{ test.name }}</span>
+        </h2>
+
+        <form method="post" class="form-group">
+            <div class="form-group mb-4">
+                <label for="test-name" class="form-label fw-semibold">Аты:</label>
+                <input type="text" id="test-name" name="name" value="{{ test.name }}" class="form-control" placeholder="Тесттің жаңа атауын енгізіңіз" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mb-3">
+                <i class="fa-solid fa-save"></i> Атын өзгерту
+            </button>
+        </form>
+
+        <h4 class="mb-3"><i class="fa-solid fa-circle-question"></i> Сұрақтар</h4>
+        {% if test.questions %}
+            <ul class="list-group mb-4">
+                {% for q in test.questions %}
+                    <li class="list-group-item d-flex justify-content-between align-items-start flex-wrap">
+                        <div class="me-auto question-text">
+                            <span class="fw-semibold">{{ q.text }} (Түрі: {{ q.question_type }})</span>
+                        </div>
+                        <div class="d-flex gap-2 mt-2 mt-sm-0">
+                            <a href="{{ url_for('edit_question', q_id=q.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fa-solid fa-pen"></i> Өзгерту
+                            </a>
+                            <a href="{{ url_for('delete_question', q_id=q.id) }}" class="btn btn-sm btn-outline-danger">
+                                <i class="fa-solid fa-trash"></i> Жою
+                            </a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-secondary">
+                <i class="fa-solid fa-circle-info"></i> Бұл тестке әлі сұрақтар қосылмаған
+            </div>
+        {% endif %}
+
+        <a href="{{ url_for('add_question', test_id=test.id) }}" class="btn btn-primary w-100 mb-3">
+            <i class="fa-solid fa-plus"></i> Жаңа сұрақ қосу
+        </a>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary w-100">
+            <i class="fa-solid fa-home"></i> Басты бетке қайту
+        </a>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #e3f2fd, #f5f7fa);
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 15px;
+        width: 100vw;
+        overflow-x: hidden;
+    }
+
+    .edit-test-container {
+        width: 100%;
+        max-width: 700px;
+        padding: 0 15px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .edit-test-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        animation: fadeIn 0.8s ease-in-out;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .card-title {
+        text-align: center;
+        color: #1a237e;
+        font-weight: 700;
+        font-size: 2.2rem;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    .card-title i {
+        color: #3f51b5;
+        font-size: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 10px;
+        display: block;
+        font-size: 1.3rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 16px 18px;
+        border: 1px solid #d0d0d0;
+        border-radius: 14px;
+        font-size: 1.15rem;
+        background-color: #fafafa;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .form-control::placeholder {
+        color: #999;
+    }
+
+    .form-control:focus {
+        border-color: #3f51b5;
+        box-shadow: 0 0 0 5px rgba(63, 81, 181, 0.15);
+        outline: none;
+        background-color: #fff;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 18px;
+        border: none;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 1.25rem;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .btn-primary {
+        background-color: #1a237e;
+        color: #fff;
+    }
+    .btn-primary:hover {
+        background-color: #283593;
+    }
+
+    .btn-secondary {
+        background-color: #eceff1;
+        color: #37474f;
+        text-decoration: none;
+        text-align: center;
+    }
+    .btn-secondary:hover {
+        background-color: #cfd8dc;
+    }
+
+    .btn-outline-primary {
+        border: 1px solid #3f51b5;
+        color: #3f51b5;
+        background-color: transparent;
+    }
+    .btn-outline-primary:hover {
+        background-color: #3f51b5;
+        color: #fff;
+    }
+
+    .btn-outline-danger {
+        border: 1px solid #dc3545;
+        color: #dc3545;
+        background-color: transparent;
+    }
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    .list-group-item {
+        border-radius: 10px;
+        margin-bottom: 10px;
+        padding: 15px;
+        background-color: #fafafa;
+        border: 1px solid #e0e0e0;
+    }
+
+    .question-text {
+        font-size: 1.1rem;
+    }
+
+    .alert-secondary {
+        background-color: #eceff1;
+        border-radius: 10px;
+        padding: 15px;
+        color: #37474f;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Планшеттер мен телефондарға арналған бейімдеу */
+    @media (max-width: 768px) {
+        .edit-test-card {
+            padding: 25px;
+        }
+        .card-title {
+            font-size: 1.8rem;
+        }
+        .card-title i {
+            font-size: 1.7rem;
+        }
+        .form-label {
+            font-size: 1.15rem;
+        }
+        .form-control {
+            font-size: 1.05rem;
+            padding: 14px;
+        }
+        .btn {
+            font-size: 1.1rem;
+            padding: 16px;
+        }
+        .question-text {
+            font-size: 1rem;
+        }
+        .btn-sm {
+            font-size: 0.9rem;
+            padding: 8px 12px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .edit-test-card {
+            padding: 20px;
+        }
+        .card-title {
+            font-size: 1.5rem;
+        }
+        .card-title i {
+            font-size: 1.4rem;
+        }
+        .form-label {
+            font-size: 1rem;
+        }
+        .form-control {
+            font-size: 0.95rem;
+            padding: 12px;
+        }
+        .btn {
+            font-size: 1rem;
+            padding: 14px;
+        }
+        .question-text {
+            font-size: 0.95rem;
+        }
+        .btn-sm {
+            font-size: 0.85rem;
+            padding: 6px 10px;
+        }
+        .list-group-item {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .alert-secondary {
+            font-size: 0.95rem;
+        }
+    }
+</style>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+{% endblock %}

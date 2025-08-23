@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="main-container">
+    <header class="school-header animate-fade-in">
+        <i class="fas fa-school"></i>
+        <h1>№22 Қожа Ахмет Яссауи атындағы жалпы білім беру орта мектебі</h1>
+    </header>
+
+    <div class="content-wrapper">
+        <div class="card animate-fade-in delay-1">
+            <h2 class="card-title"><i class="fas fa-user-graduate"></i> Оқушы тест тапсыру</h2>
+            <form action="{{ url_for('take_test') }}" method="post">
+                <div class="input-group">
+                    <label for="student-code"><i class="fas fa-key"></i> Тест коды:</label>
+                    <input type="text" id="student-code" name="code" placeholder="Тест кодын енгізіңіз" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="student-name"><i class="fas fa-id-card"></i> Толық аты-жөніңіз:</label>
+                    <input type="text" id="student-name" name="name" placeholder="Аты-жөніңізді енгізіңіз" required>
+                </div>
+
+                <button type="submit" class="btn btn-blue"><i class="fas fa-play"></i> Тестті бастау</button>
+            </form>
+        </div>
+    </div>
+
+    <button class="teacher-btn animate-fade-in delay-2" onclick="openTeacher()">
+        <i class="fas fa-chalkboard-teacher"></i>
+    </button>
+
+    <div id="teacherModal" class="modal">
+        <div class="modal-content animate-fade-in">
+            <span class="close" onclick="closeTeacher()">&times;</span>
+            <h2 class="card-title"><i class="fas fa-chalkboard-teacher"></i> Мұғалім кіру</h2>
+            <form action="{{ url_for('index') }}" method="post">
+                <div class="input-group">
+                    <label for="teacher-username"><i class="fas fa-user"></i> Логин:</label>
+                    <input type="text" id="teacher-username" name="username" placeholder="Логинді енгізіңіз" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="teacher-password"><i class="fas fa-lock"></i> Пароль:</label>
+                    <input type="password" id="teacher-password" name="password" placeholder="Парольді енгізіңіз" required>
+                </div>
+
+                <button type="submit" class="btn btn-green"><i class="fas fa-sign-in-alt"></i> Кіру</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    :root {
+        --primary-blue: #1a237e;
+        --secondary-blue: #3f51b5;
+        --accent-green: #2e7d32;
+        --accent-orange: #f57c00;
+        --card-bg: #fff;
+        --shadow-light: rgba(0, 0, 0, 0.05);
+        --shadow-medium: rgba(0, 0, 0, 0.15);
+        --shadow-heavy: rgba(0, 0, 0, 0.25);
+    }
+
+    .main-container {
+        width: 100%;
+        max-width: 700px;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .school-header {
+        text-align: center;
+        padding: 20px;
+        color: var(--primary-blue);
+        margin-bottom: 30px;
+    }
+
+    .school-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .school-header i {
+        font-size: 2.8rem;
+        margin-bottom: 12px;
+        display: block;
+        color: var(--secondary-blue);
+    }
+
+    .content-wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .card {
+        width: 100%;
+        padding: 30px;
+        border-radius: 20px;
+        background: var(--card-bg);
+        box-shadow: 0 15px 30px var(--shadow-medium);
+        animation: fadeIn 0.8s ease-in-out;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px var(--shadow-heavy);
+    }
+
+    .card-title {
+        text-align: center;
+        color: var(--primary-blue);
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .card-title i {
+        color: var(--secondary-blue);
+        font-size: 1.8rem;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    .input-group label {
+        display: block;
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 10px;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 16px 18px;
+        border: 1px solid #d0d0d0;
+        border-radius: 14px;
+        font-size: 1.15rem;
+        background-color: #fafafa;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .input-group input::placeholder {
+        color: #999;
+    }
+
+    .input-group input:focus {
+        border-color: var(--secondary-blue);
+        box-shadow: 0 0 0 5px rgba(63, 81, 181, 0.15);
+        outline: none;
+        background-color: #fff;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 18px;
+        border: none;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 1.25rem;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: #fff;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px var(--shadow-medium);
+    }
+
+    .btn-blue {
+        background-color: var(--primary-blue);
+    }
+    .btn-blue:hover {
+        background-color: #283593;
+    }
+
+    .btn-green {
+        background-color: var(--accent-green);
+    }
+    .btn-green:hover {
+        background-color: #1b5e20;
+    }
+
+    .teacher-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: var(--accent-orange);
+        color: #fff;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        box-shadow: 0 5px 15px var(--shadow-medium);
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .teacher-btn:hover {
+        background: #e68900;
+        transform: scale(1.15);
+        box-shadow: 0 8px 20px var(--shadow-heavy);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        backdrop-filter: blur(8px);
+    }
+
+    .modal.show {
+        display: flex;
+        opacity: 1;
+    }
+
+    .modal-content {
+        background: var(--card-bg);
+        margin: 20vh auto;
+        padding: 25px;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 15px 30px var(--shadow-heavy);
+        animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 1.8rem;
+        font-weight: 300;
+        cursor: pointer;
+        color: #aaa;
+        transition: color 0.3s ease;
+    }
+
+    .close:hover {
+        color: #555;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Планшеттер мен телефондарға арналған бейімдеу */
+    @media (max-width: 768px) {
+        .main-container {
+            padding: 10px;
+        }
+        .school-header h1 {
+            font-size: 1.5rem;
+        }
+        .school-header i {
+            font-size: 2.2rem;
+        }
+        .card {
+            padding: 25px;
+        }
+        .card-title {
+            font-size: 1.8rem;
+        }
+        .card-title i {
+            font-size: 1.6rem;
+        }
+        .input-group label {
+            font-size: 1.15rem;
+        }
+        .input-group input {
+            font-size: 1.05rem;
+            padding: 14px;
+        }
+        .btn {
+            font-size: 1.1rem;
+            padding: 16px;
+        }
+        .teacher-btn {
+            width: 45px;
+            height: 45px;
+            font-size: 1.3rem;
+            bottom: 15px;
+            right: 15px;
+        }
+        .modal-content {
+            padding: 20px;
+            max-width: 350px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .main-container {
+            padding: 5px;
+        }
+        .school-header h1 {
+            font-size: 1.3rem;
+        }
+        .school-header i {
+            font-size: 2rem;
+        }
+        .card {
+            padding: 20px;
+        }
+        .card-title {
+            font-size: 1.5rem;
+        }
+        .card-title i {
+            font-size: 1.4rem;
+        }
+        .input-group label {
+            font-size: 1rem;
+        }
+        .input-group input {
+            font-size: 0.95rem;
+            padding: 12px;
+        }
+        .btn {
+            font-size: 1rem;
+            padding: 14px;
+        }
+        .teacher-btn {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            bottom: 10px;
+            right: 10px;
+        }
+        .modal-content {
+            padding: 15px;
+            max-width: 300px;
+        }
+        .close {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<script>
+    function openTeacher() {
+        const modal = document.getElementById('teacherModal');
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+    }
+
+    function closeTeacher() {
+        const modal = document.getElementById('teacherModal');
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 400);
+    }
+
+    // Форма жіберілгенде модалды жабу
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', () => {
+            closeTeacher();
+        });
+    });
+</script>
+
+{% endblock %}

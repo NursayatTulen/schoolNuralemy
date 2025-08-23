@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="enter-test-container">
+    <div class="enter-test-card">
+        <h1 class="card-title">
+            <i class="fa-solid fa-sign-in-alt"></i> Тестке кіру: <span class="fw-bold">{{ test.name }}</span>
+        </h1>
+        <p class="description">Тестке кіру үшін аты-жөніңізді міндетті түрде енгізіңіз:</p>
+
+        <form action="{{ url_for('submit_name') }}" method="post" class="form">
+            <input type="hidden" name="test_id" value="{{ test.id }}">
+            <input type="hidden" name="invite_code" value="{{ invite_code }}">
+
+            <div class="form-group">
+                <label for="student_name" class="form-label">Аты-жөніңіз:</label>
+                <input type="text" id="student_name" name="student_name" class="form-control" placeholder="Аты-жөніңізді енгізіңіз" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fa-solid fa-sign-in-alt"></i> Кіру
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #e3f2fd, #f5f7fa);
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 15px;
+        width: 100vw;
+        overflow-x: hidden;
+    }
+
+    .enter-test-container {
+        width: 100%;
+        max-width: 700px;
+        padding: 0 15px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .enter-test-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        animation: fadeIn 0.8s ease-in-out;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .card-title {
+        text-align: center;
+        color: #1a237e;
+        font-weight: 700;
+        font-size: 2.2rem;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    .card-title i {
+        color: #3f51b5;
+        font-size: 2rem;
+    }
+
+    .description {
+        font-size: 1.15rem;
+        color: #444;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 10px;
+        display: block;
+        font-size: 1.3rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 16px 18px;
+        border: 1px solid #d0d0d0;
+        border-radius: 14px;
+        font-size: 1.15rem;
+        background-color: #fafafa;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-control::placeholder {
+        color: #999;
+    }
+
+    .form-control:focus {
+        border-color: #3f51b5;
+        box-shadow: 0 0 0 5px rgba(63, 81, 181, 0.15);
+        outline: none;
+        background-color: #fff;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 18px;
+        border: none;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 1.25rem;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background-color: #1a237e;
+        color: #fff;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        background-color: #283593;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Планшеттер мен телефондарға арналған бейімдеу */
+    @media (max-width: 768px) {
+        .enter-test-card {
+            padding: 25px;
+        }
+        .card-title {
+            font-size: 1.8rem;
+        }
+        .card-title i {
+            font-size: 1.7rem;
+        }
+        .description {
+            font-size: 1.05rem;
+        }
+        .form-label {
+            font-size: 1.15rem;
+        }
+        .form-control {
+            font-size: 1.05rem;
+            padding: 14px;
+        }
+        .btn {
+            font-size: 1.1rem;
+            padding: 16px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .enter-test-card {
+            padding: 20px;
+        }
+        .card-title {
+            font-size: 1.5rem;
+        }
+        .card-title i {
+            font-size: 1.4rem;
+        }
+        .description {
+            font-size: 0.95rem;
+        }
+        .form-label {
+            font-size: 1rem;
+        }
+        .form-control {
+            font-size: 0.95rem;
+            padding: 12px;
+        }
+        .btn {
+            font-size: 1rem;
+            padding: 14px;
+        }
+    }
+</style>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+{% endblock %}

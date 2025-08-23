@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="test-container">
+    <div class="test-card">
+        <h1 class="card-title">
+            <i class="fa-solid fa-file-alt"></i> Тест: <span class="fw-bold">{{ test.name }}</span>
+        </h1>
+        <h3 class="student-name mb-4">Оқушы: <span class="fw-bold">{{ student_name }}</span></h3>
+        
+        <form action="{{ url_for('submit_test') }}" method="post" id="testForm">
+            <input type="hidden" name="test_id" value="{{ test.id }}">
+            <input type="hidden" name="student_name" value="{{ student_name }}">
+
+            {% for question in test.questions %}
+            <div class="question-card mb-4">
+                <h3 class="question-text">{{ loop.index }}. {{ question.text }}</h3>
+                {% if question.image %}
+                    <img src="{{ url_for('static', filename='uploads/' + question.image) }}" 
+                         class="question-image img-fluid rounded mb-3" alt="Сұрақ суреті">
+                {% endif %}
+
+                {% if question.question_type == 'checkbox' %}
+                <div class="options">
+                    {% for option in question.options %}
+                    <label class="option-label d-block mb-2">
+                        <input type="checkbox" name="q{{ question.id }}[]" value="{{ loop.index0 }}" class="me-2">
+                        {{ option }}
+                    </label>
+                    {% endfor %}
+                </div>
+
+                {% elif question.question_type == 'matching' %}
+                <div class="matching-options d-flex justify-content-between flex-wrap">
+                    <div class="left-column">
+                        {% for left in question.left_items %}
+                        <div class="match-item mb-2">{{ left }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="right-column">
+                        {% for left in question.left_items %}
+                        <select name="q{{ question.id }}_{{ left }}" class="form-select mb-2">
+                            <option value="">Таңдаңыз</option>
+                            {% for right in question.right_items %}
+                            <option value="{{ right }}">{{ right }}</option>
+                            {% endfor %}
+                        </select>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fa-solid fa-check"></i> Тапсыру
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .test-container {
+        width: 100%;
+        max-width: 800px;
+        padding: 0 15px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .test-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        animation: fadeIn 0.8s ease-in-out;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .card-title {
+        text-align: center;
+        color: #1a237e;
+        font-weight: 700;
+        font-size: 2.2rem;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    .card-title i {
+        color: #3f51b5;
+        font-size: 2rem;
+    }
+
+    .student-name {
+        font-size: 1.8rem;
+        color: #333;
+        text-align: center;
+    }
+
+    .question-card {
+        background: #fafafa;
+        border-radius: 14px;
+        padding: 20px;
+        border: 1px solid #d0d0d0;
+    }
+
+    .question-text {
+        font-size: 1.5rem;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .question-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid #d0d0d0;
+        margin-bottom: 20px;
+    }
+
+    .options {
+        margin-bottom: 15px;
+    }
+
+    .option-label {
+        background: #fff;
+        padding: 12px 15px;
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .option-label:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+    }
+
+    .matching-options {
+        gap: 20px;
+    }
+
+    .left-column, .right-column {
+        width: 48%;
+    }
+
+    .match-item {
+        padding: 12px;
+        background: #fff;
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        font-size: 1.1rem;
+    }
+
+    .form-select {
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        background-color: #fafafa;
+        border: 1px solid #d0d0d0;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-select:focus {
+        border-color: #3f51b5;
+        box-shadow: 0 0 0 5px rgba(63, 81, 181, 0.15);
+        background-color: #fff;
+    }
+
+    .btn {
+        padding: 18px;
+        border: none;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 1.25rem;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background-color: #1a237e;
+        color: #fff;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        background-color: #283593;
+    }
+
+    /* Планшеттер мен телефондарға арналған бейімдеу */
+    @media (max-width: 768px) {
+        .test-card {
+            padding: 25px;
+        }
+        .card-title {
+            font-size: 1.8rem;
+        }
+        .card-title i {
+            font-size: 1.7rem;
+        }
+        .student-name {
+            font-size: 1.5rem;
+        }
+        .question-text {
+            font-size: 1.3rem;
+        }
+        .option-label, .match-item, .form-select {
+            font-size: 1rem;
+            padding: 10px;
+        }
+        .matching-options {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .left-column, .right-column {
+            width: 100%;
+        }
+        .btn {
+            font-size: 1.1rem;
+            padding: 16px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .test-card {
+            padding: 20px;
+        }
+        .card-title {
+            font-size: 1.5rem;
+        }
+        .card-title i {
+            font-size: 1.4rem;
+        }
+        .student-name {
+            font-size: 1.3rem;
+        }
+        .question-text {
+            font-size: 1.2rem;
+        }
+        .option-label, .match-item, .form-select {
+            font-size: 0.95rem;
+            padding: 8px;
+        }
+        .question-image {
+            margin-bottom: 15px;
+        }
+        .btn {
+            font-size: 1rem;
+            padding: 14px;
+        }
+    }
+</style>
+
+<script>
+    // Көшіру, қою, т.б. бұғаттау
+    ["copy", "cut", "paste", "contextmenu"].forEach(evt => {
+        document.addEventListener(evt, e => {
+            e.preventDefault();
+            alert("🚫 Көшіруге немесе қоюға рұқсат жоқ!");
+        });
+    });
+
+    // Скриншот, Ctrl+S/P/U/C бұғаттау
+    document.addEventListener("keydown", function(e) {
+        if (e.keyCode === 44 || (e.ctrlKey && ["s", "p", "u", "c"].includes(e.key.toLowerCase()))) {
+            e.preventDefault();
+            alert("🚫 Скриншот жасауға немесе сақтауға болмайды!");
+        }
+    });
+
+    // Тесттен шығуды бақылау
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") {
+            fetch('{{ url_for('warn_user') }}', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ test_id: '{{ test.id }}', student_name: '{{ student_name }}' })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'warned') {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            sessionStorage.setItem("restart", "true");
+            alert("⚠️ Сіз тесттен шықтыңыз! Ол қайта басталады.");
+        }
+        if (document.visibilityState === "visible" && sessionStorage.getItem("restart")) {
+            sessionStorage.removeItem("restart");
+            window.location.href = "{{ url_for('index') }}";
+        }
+    });
+
+    // Терезе жабылса, sessionStorage тазалау
+    window.addEventListener("beforeunload", function () {
+        sessionStorage.clear();
+    });
+</script>
+{% endblock %}

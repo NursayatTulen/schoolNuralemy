@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="question-container">
+    <div class="question-card">
+        <h2 class="card-title"><i class="fa-solid fa-circle-question"></i> Жаңа сұрақ қосу</h2>
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="question-text" class="form-label">Сұрақ мәтіні:</label>
+                <textarea name="text" id="question-text" class="form-control" rows="3" placeholder="Сұрақты жазыңыз..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="question-type" class="form-label">Сұрақ түрі:</label>
+                <div class="select-wrapper">
+                    <select name="question_type" id="question_type" class="form-select" onchange="toggleQuestionType()">
+                        <option value="checkbox">Бірнеше таңдау</option>
+                        <option value="matching">Сәйкестендіру</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="checkbox_options" class="options-section">
+                <div id="options">
+                    <div class="option-item">
+                        <input type="text" name="option[]" class="form-control" placeholder="Опция енгізіңіз">
+                        <div class="check-box">
+                            <input class="check-input" type="checkbox" name="correct[]" value="0">
+                            <label class="check-label">Дұрыс</label>
+                        </div>
+                        <button type="button" class="btn-remove" onclick="removeOption(this)">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="button" class="btn-add" onclick="addOption()">
+                    <i class="fa-solid fa-plus"></i> Опция қосу
+                </button>
+            </div>
+
+            <div id="matching_options" class="options-section" style="display: none;">
+                <div id="match_pairs">
+                    <div class="match-item">
+                        <input type="text" name="match_left[]" class="form-control" placeholder="Сол жағы">
+                        <input type="text" name="match_right[]" class="form-control" placeholder="Оң жағы">
+                        <button type="button" class="btn-remove" onclick="removeMatch(this)">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="button" class="btn-add" onclick="addMatch()">
+                    <i class="fa-solid fa-plus"></i> Жұп қосу
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-image"></i> Сурет:</label>
+                <input type="file" name="image" class="form-control file-input">
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fa-solid fa-check"></i> Қосу
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        padding: 40px 20px;
+        box-sizing: border-box;
+    }
+
+    .question-container {
+        width: 100%;
+        max-width: 650px;
+    }
+
+    .question-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 25px;
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(5px);
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    .card-title {
+        text-align: center;
+        color: #01579b;
+        font-weight: 700;
+        font-size: 1.8rem;
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 1rem;
+        background-color: #f9f9f9;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #00796b;
+        box-shadow: 0 0 0 4px rgba(0, 121, 107, 0.1);
+        outline: none;
+        background-color: #fff;
+    }
+
+    .select-wrapper {
+        position: relative;
+    }
+    .select-wrapper::after {
+        content: '\f078';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: #777;
+    }
+
+    /* Options Section */
+    .options-section {
+        border: 1px dashed #ccc;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+        animation: slideIn 0.5s ease;
+    }
+
+    .option-item, .match-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+        animation: itemFadeIn 0.4s ease forwards;
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    .option-item:first-child, .match-item:first-child {
+        animation-delay: 0.1s;
+    }
+    
+    .option-item:last-child, .match-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .check-box {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .check-input {
+        width: 1.2rem;
+        height: 1.2rem;
+        cursor: pointer;
+    }
+    
+    .btn-remove {
+        background: #ef5350;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+    .btn-remove:hover {
+        background-color: #c62828;
+        transform: scale(1.05);
+    }
+
+    .btn-add {
+        background: #00897b;
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        width: 100%;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-add:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-submit {
+        background: #01579b;
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 15px;
+        width: 100%;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        background: #00427a;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes itemFadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideIn {
+        from { transform: scaleY(0); opacity: 0; }
+        to { transform: scaleY(1); opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 500px) {
+        .question-card {
+            padding: 20px;
+        }
+        .card-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<script>
+    let optionCount = 1;
+    let matchCount = 1;
+
+    function addOption() {
+        const optionsDiv = document.getElementById('options');
+        const div = document.createElement('div');
+        div.className = 'option-item';
+        div.style.opacity = '0';
+        div.style.transform = 'translateY(10px)';
+
+        div.innerHTML = `
+            <input type="text" name="option[]" class="form-control" placeholder="Опция енгізіңіз">
+            <div class="check-box">
+                <input class="check-input" type="checkbox" name="correct[]" value="${optionCount}">
+                <label class="check-label">Дұрыс</label>
+            </div>
+            <button type="button" class="btn-remove" onclick="removeOption(this)">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        `;
+        optionsDiv.appendChild(div);
+        
+        setTimeout(() => {
+            div.style.opacity = '1';
+            div.style.transform = 'translateY(0)';
+        }, 10);
+        optionCount++;
+    }
+
+    function removeOption(btn) {
+        const item = btn.parentElement;
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+            item.remove();
+        }, 200);
+    }
+
+    function addMatch() {
+        const matchPairsDiv = document.getElementById('match_pairs');
+        const div = document.createElement('div');
+        div.className = 'match-item';
+        div.style.opacity = '0';
+        div.style.transform = 'translateY(10px)';
+
+        div.innerHTML = `
+            <input type="text" name="match_left[]" class="form-control" placeholder="Сол жағы">
+            <input type="text" name="match_right[]" class="form-control" placeholder="Оң жағы">
+            <button type="button" class="btn-remove" onclick="removeMatch(this)">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        `;
+        matchPairsDiv.appendChild(div);
+
+        setTimeout(() => {
+            div.style.opacity = '1';
+            div.style.transform = 'translateY(0)';
+        }, 10);
+        matchCount++;
+    }
+
+    function removeMatch(btn) {
+        const item = btn.parentElement;
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+            item.remove();
+        }, 200);
+    }
+
+    function toggleQuestionType() {
+        const type = document.getElementById('question_type').value;
+        const checkboxOptions = document.getElementById('checkbox_options');
+        const matchingOptions = document.getElementById('matching_options');
+
+        if (type === 'checkbox') {
+            checkboxOptions.style.display = 'block';
+            matchingOptions.style.display = 'none';
+        } else {
+            checkboxOptions.style.display = 'none';
+            matchingOptions.style.display = 'block';
+        }
+    }
+</script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+{% endblock %}

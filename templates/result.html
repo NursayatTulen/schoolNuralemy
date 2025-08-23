@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="result-container">
+    <div class="result-card">
+        <h1 class="card-title">
+            <i class="fa-solid fa-trophy"></i> Тест нәтижесі: <span class="fw-bold">{{ test.name }}</span>
+        </h1>
+        <div class="text-center">
+            <h3 class="student-name mb-3">Аты-жөніңіз: <span class="fw-bold">{{ student_name }}</span></h3>
+            <p class="score">Ұпай: <span class="highlight">{{ score }} / {{ total_questions }}</span></p>
+            <p class="percentage">Пайыз: <span class="highlight">{{ percentage | round(2) }}%</span></p>
+            {% if percentage >= 90 %}
+                <p class="feedback text-success"><i class="fa-solid fa-star"></i> Тамаша нәтиже! Жарайсыз!</p>
+            {% elif percentage >= 70 %}
+                <p class="feedback text-primary"><i class="fa-solid fa-thumbs-up"></i> Жақсы нәтиже! Жақсы жұмыс!</p>
+            {% elif percentage >= 50 %}
+                <p class="feedback text-warning"><i class="fa-solid fa-book-open"></i> Орташа нәтиже. Жаттығуды жалғастырыңыз!</p>
+            {% else %}
+                <p class="feedback text-danger"><i class="fa-solid fa-redo"></i> Қайталап көріңіз. Келесі жолы жақсы болады!</p>
+            {% endif %}
+        </div>
+        <a href="{{ url_for('index') }}" class="btn btn-primary w-100 mt-4">
+            <i class="fa-solid fa-home"></i> Басты бетке қайту
+        </a>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #e3f2fd, #f5f7fa);
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 15px;
+        width: 100vw;
+        overflow-x: hidden;
+    }
+
+    .result-container {
+        width: 100%;
+        max-width: 700px;
+        padding: 0 15px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .result-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        animation: fadeIn 0.8s ease-in-out;
+        width: 100%;
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .card-title {
+        color: #1a237e;
+        font-weight: 700;
+        font-size: 2.2rem;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    .card-title i {
+        color: #3f51b5;
+        font-size: 2rem;
+    }
+
+    .student-name {
+        font-size: 1.8rem;
+        color: #333;
+    }
+
+    .score, .percentage {
+        font-size: 1.5rem;
+        margin: 20px 0;
+        color: #444;
+    }
+
+    .highlight {
+        font-weight: 600;
+        color: #3f51b5;
+    }
+
+    .feedback {
+        font-size: 1.3rem;
+        margin: 25px 0;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .text-success { color: #28a745; }
+    .text-primary { color: #3f51b5; }
+    .text-warning { color: #ffc107; }
+    .text-danger { color: #dc3545; }
+
+    .btn {
+        width: 100%;
+        padding: 18px;
+        border: none;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 1.25rem;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background-color: #1a237e;
+        color: #fff;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        background-color: #283593;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Планшеттер мен телефондарға арналған бейімдеу */
+    @media (max-width: 768px) {
+        .result-card {
+            padding: 25px;
+        }
+        .card-title {
+            font-size: 1.8rem;
+        }
+        .card-title i {
+            font-size: 1.7rem;
+        }
+        .student-name {
+            font-size: 1.5rem;
+        }
+        .score, .percentage {
+            font-size: 1.3rem;
+        }
+        .feedback {
+            font-size: 1.1rem;
+        }
+        .btn {
+            font-size: 1.1rem;
+            padding: 16px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .result-card {
+            padding: 20px;
+        }
+        .card-title {
+            font-size: 1.5rem;
+        }
+        .card-title i {
+            font-size: 1.4rem;
+        }
+        .student-name {
+            font-size: 1.3rem;
+        }
+        .score, .percentage {
+            font-size: 1.2rem;
+            margin: 15px 0;
+        }
+        .feedback {
+            font-size: 1rem;
+        }
+        .btn {
+            font-size: 1rem;
+            padding: 14px;
+        }
+    }
+</style>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card-custom">
+    <h2 class="mb-4 text-primary">
+        <i class="fa-solid fa-pen-to-square"></i> Сұрақты өзгерту
+    </h2>
+    <form method="post" enctype="multipart/form-data">
+        <!-- Сұрақ мәтіні -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Сұрақ мәтіні:</label>
+            <textarea name="text" class="form-control rounded-3" rows="3" placeholder="Сұрақты жазыңыз...">{{ question.text | default('') }}</textarea>
+        </div>
+
+        <!-- Опциялар -->
+        <div id="options" class="mb-3">
+            {% if options %}
+                {% for i in range(options | length) %}
+                    <div class="option-group d-flex gap-2 align-items-center mb-2">
+                        <input type="text" name="option[]" value="{{ options[i] | escape }}" class="form-control rounded-3" placeholder="Опция енгізіңіз">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="correct[]" value="{{ i }}" {% if i in correct %}checked{% endif %}>
+                            <label class="form-check-label">Дұрыс</label>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger btn-sm rounded-3" onclick="removeOption(this)">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-secondary">
+                    <i class="fa-solid fa-circle-info"></i> Опциялар жоқ. Жаңа қосу үшін батырманы басыңыз.
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Опция қосу батырмасы -->
+        <button type="button" class="btn btn-outline-primary w-100 rounded-3 mb-3" onclick="addOption()">
+            <i class="fa-solid fa-plus"></i> Опция қосу
+        </button>
+
+        <!-- Сурет -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold"><i class="fa-solid fa-image"></i> Жаңа сурет:</label>
+            <input type="file" name="image" class="form-control rounded-3">
+        </div>
+        {% if question.image %}
+            <div class="mb-3">
+                <img src="{{ url_for('static', filename='uploads/' + question.image) }}" class="img-fluid rounded-3 shadow-sm" style="max-width: 200px;">
+            </div>
+        {% endif %}
+
+        <!-- Сақтау батырмасы -->
+        <button type="submit" class="btn btn-success w-100 rounded-3 fw-bold">
+            <i class="fa-solid fa-save"></i> Сақтау
+        </button>
+    </form>
+</div>
+
+<script>
+    let optionCount = {{ options | length if options else 0 }};
+    function addOption() {
+        const div = document.createElement('div');
+        div.className = 'option-group d-flex gap-2 align-items-center mb-2';
+        div.innerHTML = `
+            <input type="text" name="option[]" class="form-control rounded-3" placeholder="Опция енгізіңіз">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="correct[]" value="${optionCount}">
+                <label class="form-check-label">Дұрыс</label>
+            </div>
+            <button type="button" class="btn btn-outline-danger btn-sm rounded-3" onclick="removeOption(this)">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        `;
+        document.getElementById('options').appendChild(div);
+        optionCount++;
+    }
+    function removeOption(btn) {
+        btn.parentElement.remove();
+    }
+</script>
+{% endblock %}
