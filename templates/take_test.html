@@ -12,49 +12,59 @@
             <input type="hidden" name="test_id" value="{{ test.id }}">
             <input type="hidden" name="student_name" value="{{ student_name }}">
 
-            {% for question in test.questions %}
-            <div class="question-card mb-4">
-                <h3 class="question-text">{{ loop.index }}. {{ question.text }}</h3>
-                {% if question.image %}
-                    <img src="{{ url_for('static', filename='uploads/' + question.image) }}" 
-                         class="question-image img-fluid rounded mb-3" alt="Сұрақ суреті">
-                {% endif %}
+            <div id="question-container">
+                {% for question in test.questions %}
+                <div class="question-card" id="question-{{ loop.index }}" style="display: {% if loop.index == 1 %}block{% else %}none{% endif %};">
+                    <h3 class="question-text">{{ loop.index }}. {{ question.text }}</h3>
+                    {% if question.image %}
+                        <img src="{{ url_for('static', filename='uploads/' + question.image) }}" 
+                             class="question-image img-fluid rounded mb-3" alt="Сұрақ суреті">
+                    {% endif %}
 
-                {% if question.question_type == 'checkbox' %}
-                <div class="options">
-                    {% for option in question.options %}
-                    <label class="option-label d-block mb-2">
-                        <input type="checkbox" name="q{{ question.id }}[]" value="{{ loop.index0 }}" class="me-2">
-                        {{ option }}
-                    </label>
-                    {% endfor %}
-                </div>
-
-                {% elif question.question_type == 'matching' %}
-                <div class="matching-options d-flex justify-content-between flex-wrap">
-                    <div class="left-column">
-                        {% for left in question.left_items %}
-                        <div class="match-item mb-2">{{ left }}</div>
+                    {% if question.question_type == 'checkbox' %}
+                    <div class="options">
+                        {% for option in question.options %}
+                        <label class="option-label d-block mb-2">
+                            <input type="checkbox" name="q{{ question.id }}[]" value="{{ loop.index0 }}" class="me-2">
+                            {{ option }}
+                        </label>
                         {% endfor %}
                     </div>
-                    <div class="right-column">
-                        {% for left in question.left_items %}
-                        <select name="q{{ question.id }}_{{ left }}" class="form-select mb-2">
-                            <option value="">Таңдаңыз</option>
-                            {% for right in question.right_items %}
-                            <option value="{{ right }}">{{ right }}</option>
+
+                    {% elif question.question_type == 'matching' %}
+                    <div class="matching-options d-flex justify-content-between flex-wrap">
+                        <div class="left-column">
+                            {% for left in question.left_items %}
+                            <div class="match-item mb-2">{{ left }}</div>
                             {% endfor %}
-                        </select>
-                        {% endfor %}
+                        </div>
+                        <div class="right-column">
+                            {% for left in question.left_items %}
+                            <select name="q{{ question.id }}_{{ left }}" class="form-select mb-2">
+                                <option value="">Таңдаңыз</option>
+                                {% for right in question.right_items %}
+                                <option value="{{ right }}">{{ right }}</option>
+                                {% endfor %}
+                            </select>
+                            {% endfor %}
+                        </div>
                     </div>
+                    {% endif %}
                 </div>
-                {% endif %}
+                {% endfor %}
             </div>
-            {% endfor %}
 
-            <button type="submit" class="btn btn-primary w-100">
-                <i class="fa-solid fa-check"></i> Тапсыру
-            </button>
+            <div class="navigation-buttons">
+                <button type="button" id="prev-btn" class="btn btn-secondary w-45" disabled>
+                    <i class="fa-solid fa-arrow-left"></i> Алдыңғы
+                </button>
+                <button type="button" id="next-btn" class="btn btn-primary w-45">
+                    Келесі <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                <button type="submit" id="submit-btn" class="btn btn-primary w-100" style="display: none;">
+                    <i class="fa-solid fa-check"></i> Тапсыру
+                </button>
+            </div>
         </form>
     </div>
 </div>
@@ -66,23 +76,28 @@
         padding: 0 15px;
         display: flex;
         justify-content: center;
+        min-height: 100vh;
+        align-items: center;
     }
 
     .test-card {
         background: #fff;
         border-radius: 20px;
-        padding: 40px;
+        padding: 30px;
         box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-        animation: fadeIn 0.8s ease-in-out;
         width: 100%;
         max-width: 100%;
+        min-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
     .card-title {
         text-align: center;
         color: #1a237e;
         font-weight: 700;
-        font-size: 2.2rem;
+        font-size: 1.8rem;
         margin-bottom: 20px;
         display: flex;
         align-items: center;
@@ -91,11 +106,11 @@
     }
     .card-title i {
         color: #3f51b5;
-        font-size: 2rem;
+        font-size: 1.7rem;
     }
 
     .student-name {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
         color: #333;
         text-align: center;
     }
@@ -105,10 +120,11 @@
         border-radius: 14px;
         padding: 20px;
         border: 1px solid #d0d0d0;
+        flex-grow: 1;
     }
 
     .question-text {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         color: #333;
         margin-bottom: 15px;
     }
@@ -152,13 +168,13 @@
         background: #fff;
         border-radius: 10px;
         border: 1px solid #e0e0e0;
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
 
     .form-select {
         padding: 12px;
         border-radius: 10px;
-        font-size: 1.1rem;
+        font-size: 1rem;
         background-color: #fafafa;
         border: 1px solid #d0d0d0;
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -171,46 +187,69 @@
     }
 
     .btn {
-        padding: 18px;
+        padding: 14px;
         border: none;
-        border-radius: 14px;
+        border-radius: 10px;
         font-weight: 600;
-        font-size: 1.25rem;
+        font-size: 1.1rem;
         cursor: pointer;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
+    }
+
+    .btn-primary {
         background-color: #1a237e;
+        color: #fff;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
         color: #fff;
     }
 
     .btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .btn-primary:hover {
         background-color: #283593;
     }
 
-    /* Планшеттер мен телефондарға арналған бейімдеу */
+    .navigation-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .w-45 {
+        width: 48%;
+    }
+
+    /* Мобильді құрылғыларға бейімдеу */
     @media (max-width: 768px) {
         .test-card {
-            padding: 25px;
+            padding: 20px;
+            min-height: 90vh;
         }
         .card-title {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
         }
         .card-title i {
-            font-size: 1.7rem;
-        }
-        .student-name {
             font-size: 1.5rem;
         }
-        .question-text {
+        .student-name {
             font-size: 1.3rem;
         }
+        .question-text {
+            font-size: 1.2rem;
+        }
         .option-label, .match-item, .form-select {
-            font-size: 1rem;
+            font-size: 0.95rem;
             padding: 10px;
         }
         .matching-options {
@@ -221,42 +260,87 @@
             width: 100%;
         }
         .btn {
-            font-size: 1.1rem;
-            padding: 16px;
+            font-size: 1rem;
+            padding: 12px;
         }
     }
 
     @media (max-width: 480px) {
         .test-card {
-            padding: 20px;
+            padding: 15px;
         }
         .card-title {
-            font-size: 1.5rem;
-        }
-        .card-title i {
             font-size: 1.4rem;
         }
-        .student-name {
+        .card-title i {
             font-size: 1.3rem;
         }
-        .question-text {
+        .student-name {
             font-size: 1.2rem;
         }
+        .question-text {
+            font-size: 1.1rem;
+        }
         .option-label, .match-item, .form-select {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             padding: 8px;
         }
         .question-image {
             margin-bottom: 15px;
         }
         .btn {
-            font-size: 1rem;
-            padding: 14px;
+            font-size: 0.95rem;
+            padding: 10px;
+        }
+        .navigation-buttons {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .w-45 {
+            width: 100%;
         }
     }
 </style>
 
 <script>
+    // Сұрақтарды бір-бірден көрсету
+    let currentQuestion = 1;
+    const totalQuestions = {{ test.questions | length }};
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const submitBtn = document.getElementById('submit-btn');
+
+    function showQuestion(index) {
+        // Барлық сұрақтарды жасыру
+        document.querySelectorAll('.question-card').forEach(card => {
+            card.style.display = 'none';
+        });
+        // Тек қазіргі сұрақты көрсету
+        document.getElementById(`question-${index}`).style.display = 'block';
+
+        // Батырмалардың күйін жаңарту
+        prevBtn.disabled = index === 1;
+        nextBtn.style.display = index === totalQuestions ? 'none' : 'block';
+        submitBtn.style.display = index === totalQuestions ? 'block' : 'none';
+    }
+
+    prevBtn.addEventListener('click', () => {
+        if (currentQuestion > 1) {
+            currentQuestion--;
+            showQuestion(currentQuestion);
+        }
+    });
+
+    nextBtn.addEventListener('click', () => {
+        if (currentQuestion < totalQuestions) {
+            currentQuestion++;
+            showQuestion(currentQuestion);
+        }
+    });
+
+    // Бірінші сұрақты көрсету
+    showQuestion(currentQuestion);
+
     // Көшіру, қою, т.б. бұғаттау
     ["copy", "cut", "paste", "contextmenu"].forEach(evt => {
         document.addEventListener(evt, e => {
