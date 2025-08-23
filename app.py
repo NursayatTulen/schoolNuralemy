@@ -321,7 +321,7 @@ def open_test(id):
     test.is_open = True
     test.opened_at = datetime.utcnow()
     test.closed_at = None
-    test.results = []
+    test.results.clear()  # Дұрысталған жол: ескі нәтижелерді тазалау
     db.session.commit()
     flash(f'Тест ашылды, код: {test.access_code}')
     return redirect(url_for('invite_student', id=id))
