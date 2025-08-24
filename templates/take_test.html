@@ -310,13 +310,25 @@
     const nextBtn = document.getElementById('next-btn');
     const submitBtn = document.getElementById('submit-btn');
 
+    // Элементтердің дұрыс табылғанын тексеру
+    console.log('prevBtn:', prevBtn);
+    console.log('nextBtn:', nextBtn);
+    console.log('submitBtn:', submitBtn);
+    console.log('totalQuestions:', totalQuestions);
+
     function showQuestion(index) {
+        console.log('showQuestion called with index:', index); // Дебаг
         // Барлық сұрақтарды жасыру
         document.querySelectorAll('.question-card').forEach(card => {
             card.style.display = 'none';
         });
         // Тек қазіргі сұрақты көрсету
-        document.getElementById(`question-${index}`).style.display = 'block';
+        const currentCard = document.getElementById(`question-${index}`);
+        if (currentCard) {
+            currentCard.style.display = 'block';
+        } else {
+            console.error(`Question card with id question-${index} not found`);
+        }
 
         // Батырмалардың күйін жаңарту
         prevBtn.disabled = index === 1;
@@ -324,19 +336,29 @@
         submitBtn.style.display = index === totalQuestions ? 'block' : 'none';
     }
 
-    prevBtn.addEventListener('click', () => {
-        if (currentQuestion > 1) {
-            currentQuestion--;
-            showQuestion(currentQuestion);
-        }
-    });
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            console.log('Previous button clicked, currentQuestion:', currentQuestion); // Дебаг
+            if (currentQuestion > 1) {
+                currentQuestion--;
+                showQuestion(currentQuestion);
+            }
+        });
+    } else {
+        console.error('prevBtn not found');
+    }
 
-    nextBtn.addEventListener('click', () => {
-        if (currentQuestion < totalQuestions) {
-            currentQuestion++;
-            showQuestion(currentQuestion);
-        }
-    });
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            console.log('Next button clicked, currentQuestion:', currentQuestion); // Дебаг
+            if (currentQuestion < totalQuestions) {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+            }
+        });
+    } else {
+        console.error('nextBtn not found');
+    }
 
     // Бірінші сұрақты көрсету
     showQuestion(currentQuestion);
@@ -370,7 +392,7 @@
         if (e.keyCode === 44 || (e.ctrlKey && ["s", "p", "u", "c"].includes(e.key.toLowerCase()))) {
             e.preventDefault();
             alert("🚫 Скриншот жасауға немесе сақтауға болмайды!");
-       
+        }
     });
 
     // Тесттен шығуды бақылау
@@ -389,9 +411,7 @@
                 })
                 .catch(error => console.error('Error:', error));
             sessionStorage.setItem("restart", "true");
-            alert("⚠️ Сіз тесттен
-
- шықтыңыз! Ол қайта басталады.");
+            alert("⚠️ Сіз тесттен шықтыңыз! Ол қайта басталады.");
         }
         if (document.visibilityState === "visible" && sessionStorage.getItem("restart")) {
             sessionStorage.removeItem("restart");
