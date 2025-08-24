@@ -22,10 +22,10 @@
                     {% endif %}
 
                     {% if question.question_type == 'checkbox' %}
-                    <div class="options">
+                    <div class="options" data-correct-count="{{ question.correct | length }}">
                         {% for option in question.options %}
                         <label class="option-label d-block mb-2">
-                            <input type="checkbox" name="q{{ question.id }}[]" value="{{ loop.index0 }}" class="me-2">
+                            <input type="checkbox" name="q{{ question.id }}[]" value="{{ loop.index0 }}" class="me-2 checkbox-option">
                             {{ option }}
                         </label>
                         {% endfor %}
@@ -177,7 +177,7 @@
         font-size: 1rem;
         background-color: #fafafa;
         border: 1px solid #d0d0d0;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        transition: blanca-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     .form-select:focus {
@@ -340,6 +340,22 @@
 
     // Бірінші сұрақты көрсету
     showQuestion(currentQuestion);
+
+    // Checkbox таңдауын шектеу
+    document.querySelectorAll('.options').forEach(optionDiv => {
+        const correctCount = parseInt(optionDiv.getAttribute('data-correct-count'));
+        const checkboxes = optionDiv.querySelectorAll('.checkbox-option');
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const checkedCount = optionDiv.querySelectorAll('.checkbox-option:checked').length;
+                if (checkedCount > correctCount) {
+                    checkbox.checked = false;
+                    alert(`Бұл сұраққа тек ${correctCount} жауап таңдауға болады!`);
+                }
+            });
+        });
+    });
 
     // Көшіру, қою, т.б. бұғаттау
     ["copy", "cut", "paste", "contextmenu"].forEach(evt => {

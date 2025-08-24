@@ -138,15 +138,17 @@ def submit_test():
         if q.question_type == 'checkbox':
             selected = [int(x) for x in request.form.getlist(f'q{q.id}[]')]
             correct_list = json.loads(q.correct or '[]')
-            if set(selected) == set(correct_list):
+            # Егер кем дегенде бір дұрыс жауап таңдалса, 1 ұпай беріледі
+            if any(i in correct_list for i in selected):
                 score += 1
             answers[q.id] = selected
         elif q.question_type == 'matching':
             matched = {}
-            for key in json.loads(q.match_pairs or '{}').keys():
-                matched[key] = request.form.get(f'q{q.id}_{key}')
             correct_pairs = json.loads(q.match_pairs or '{}')
-            if matched == correct_pairs:
+            for key in correct_pairs.keys():
+                matched[key] = request.form.get(f'q{q.id}_{key}')
+            # Егер кем дегенде бір жұп дұрыс сәйкестендірілсе, 1 ұпай беріледі
+            if any(matched[key] == correct_pairs[key] for key in matched):
                 score += 1
             answers[q.id] = matched
     
@@ -208,7 +210,7 @@ def add_question(test_id):
                 if not isinstance(json_data, list):
                     flash('JSON массиві болуы керек')
                     return redirect(url_for('add_question', test_id=test_id))
-                json_questions = json_data  # JSON сұрақтарын шаблонға жіберу
+                json_questions = json_data
                 for q in json_data:
                     text = q.get('text')
                     question_type = q.get('question_type')
