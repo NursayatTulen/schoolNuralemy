@@ -94,6 +94,10 @@ def take_test():
         return redirect(url_for('index'))
     test = Test.query.filter_by(access_code=code, is_open=True).first()
     if test:
+        # Сұрақтарды кездейсоқ араластыру
+        questions = list(test.questions)
+        random.shuffle(questions)
+        test.questions = questions
         for q in test.questions:
             if q.question_type == 'checkbox':
                 q.options = json.loads(q.options or '[]')
@@ -515,6 +519,10 @@ def submit_name():
     if test and test.is_open and invite_code == test.access_code and student_name:
         session['test_id'] = test.id
         session['student_name'] = student_name
+        # Сұрақтарды кездейсоқ араластыру
+        questions = list(test.questions)
+        random.shuffle(questions)
+        test.questions = questions
         for q in test.questions:
             if q.question_type == 'checkbox':
                 q.options = json.loads(q.options or '[]')

@@ -177,7 +177,7 @@
         font-size: 1rem;
         background-color: #fafafa;
         border: 1px solid #d0d0d0;
-        transition: blanca-color 0.3s ease, box-shadow 0.3s ease;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     .form-select:focus {
@@ -370,7 +370,7 @@
         if (e.keyCode === 44 || (e.ctrlKey && ["s", "p", "u", "c"].includes(e.key.toLowerCase()))) {
             e.preventDefault();
             alert("🚫 Скриншот жасауға немесе сақтауға болмайды!");
-        }
+       
     });
 
     // Тесттен шығуды бақылау
@@ -389,7 +389,9 @@
                 })
                 .catch(error => console.error('Error:', error));
             sessionStorage.setItem("restart", "true");
-            alert("⚠️ Сіз тесттен шықтыңыз! Ол қайта басталады.");
+            alert("⚠️ Сіз тесттен
+
+ шықтыңыз! Ол қайта басталады.");
         }
         if (document.visibilityState === "visible" && sessionStorage.getItem("restart")) {
             sessionStorage.removeItem("restart");
