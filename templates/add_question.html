@@ -54,6 +54,19 @@
             </div>
 
             <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-file-code"></i> JSON мәтіні:</label>
+                <textarea name="json_text" id="json_text" class="form-control" rows="5" placeholder="JSON мәтінін осында енгізіңіз..." oninput="loadJsonQuestions()"></textarea>
+                <button type="button" class="btn-add" onclick="addPromptTemplate()" style="margin-top: 10px;">
+                    <i class="fa-solid fa-lightbulb"></i> Промт қосу
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-file"></i> JSON файлын жүктеу:</label>
+                <input type="file" name="json_file" id="json_file" class="form-control file-input" accept=".json" onchange="loadJsonQuestionsFromFile()">
+            </div>
+
+            <div class="form-group">
                 <label class="form-label"><i class="fa-solid fa-image"></i> Сурет:</label>
                 <input type="file" name="image" class="form-control file-input">
             </div>
@@ -120,6 +133,7 @@
         font-size: 1rem;
         background-color: #f9f9f9;
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        word-wrap: break-word;
     }
 
     .form-control:focus, .form-select:focus {
@@ -144,7 +158,6 @@
         color: #777;
     }
 
-    /* Options Section */
     .options-section {
         border: 1px dashed #ccc;
         border-radius: 15px;
@@ -156,7 +169,7 @@
     .option-item, .match-item {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 15px;
         margin-bottom: 15px;
         animation: itemFadeIn 0.4s ease forwards;
         opacity: 0;
@@ -174,6 +187,7 @@
         display: flex;
         align-items: center;
         gap: 5px;
+        min-width: 80px;
     }
     .check-input {
         width: 1.2rem;
@@ -189,6 +203,7 @@
         padding: 8px 12px;
         cursor: pointer;
         transition: transform 0.2s ease, background-color 0.2s ease;
+        flex-shrink: 0;
     }
     .btn-remove:hover {
         background-color: #c62828;
@@ -229,8 +244,12 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         background: #00427a;
     }
-    
-    /* Animations */
+
+    .file-input {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
@@ -244,13 +263,42 @@
         to { transform: scaleY(1); opacity: 1; }
     }
 
-    /* Responsive */
-    @media (max-width: 500px) {
+    @media (max-width: 600px) {
         .question-card {
             padding: 20px;
         }
         .card-title {
             font-size: 1.5rem;
+        }
+        .option-item, .match-item {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+        .form-control {
+            width: 100%;
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+        .check-box {
+            justify-content: flex-start;
+        }
+        .btn-remove {
+            align-self: flex-end;
+        }
+        .file-input {
+            font-size: 0.85rem;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .form-control, .form-select {
+            font-size: 0.9rem;
+            padding: 10px;
+        }
+        .btn-submit {
+            font-size: 1rem;
+            padding: 12px;
         }
     }
 </style>
@@ -259,7 +307,7 @@
     let optionCount = 1;
     let matchCount = 1;
 
-    function addOption() {
+    function addOption(text = '', isCorrect = false, index = optionCount) {
         const optionsDiv = document.getElementById('options');
         const div = document.createElement('div');
         div.className = 'option-item';
@@ -267,9 +315,9 @@
         div.style.transform = 'translateY(10px)';
 
         div.innerHTML = `
-            <input type="text" name="option[]" class="form-control" placeholder="Опция енгізіңіз">
+            <input type="text" name="option[]" class="form-control" placeholder="Опция енгізіңіз" value="${text}">
             <div class="check-box">
-                <input class="check-input" type="checkbox" name="correct[]" value="${optionCount}">
+                <input class="check-input" type="checkbox" name="correct[]" value="${index}" ${isCorrect ? 'checked' : ''}>
                 <label class="check-label">Дұрыс</label>
             </div>
             <button type="button" class="btn-remove" onclick="removeOption(this)">
@@ -294,7 +342,7 @@
         }, 200);
     }
 
-    function addMatch() {
+    function addMatch(left = '', right = '') {
         const matchPairsDiv = document.getElementById('match_pairs');
         const div = document.createElement('div');
         div.className = 'match-item';
@@ -302,8 +350,8 @@
         div.style.transform = 'translateY(10px)';
 
         div.innerHTML = `
-            <input type="text" name="match_left[]" class="form-control" placeholder="Сол жағы">
-            <input type="text" name="match_right[]" class="form-control" placeholder="Оң жағы">
+            <input type="text" name="match_left[]" class="form-control" placeholder="Сол жағы" value="${left}">
+            <input type="text" name="match_right[]" class="form-control" placeholder="Оң жағы" value="${right}">
             <button type="button" class="btn-remove" onclick="removeMatch(this)">
                 <i class="fa-solid fa-trash"></i>
             </button>
@@ -338,6 +386,116 @@
             checkboxOptions.style.display = 'none';
             matchingOptions.style.display = 'block';
         }
+    }
+
+    function loadJsonQuestions() {
+        const jsonText = document.getElementById('json_text').value;
+        if (!jsonText) return;
+
+        try {
+            const jsonData = JSON.parse(jsonText);
+            if (!Array.isArray(jsonData)) {
+                alert('JSON массиві болуы керек');
+                return;
+            }
+
+            const firstQuestion = jsonData[0];
+            if (!firstQuestion) return;
+
+            document.getElementById('question-text').value = firstQuestion.text || '';
+            document.getElementById('question_type').value = firstQuestion.question_type || 'checkbox';
+            toggleQuestionType();
+
+            if (firstQuestion.question_type === 'checkbox') {
+                const optionsDiv = document.getElementById('options');
+                optionsDiv.innerHTML = '';
+                optionCount = 0;
+                firstQuestion.options.forEach((option, index) => {
+                    const isCorrect = firstQuestion.correct.includes(index);
+                    addOption(option, isCorrect, index);
+                });
+            }
+
+            if (firstQuestion.question_type === 'matching') {
+                const matchPairsDiv = document.getElementById('match_pairs');
+                matchPairsDiv.innerHTML = '';
+                matchCount = 0;
+                for (const [left, right] of Object.entries(firstQuestion.match_pairs || {})) {
+                    addMatch(left, right);
+                }
+            }
+        } catch (e) {
+            alert('Қате JSON форматы: ' + e.message);
+        }
+    }
+
+    function loadJsonQuestionsFromFile() {
+        const fileInput = document.getElementById('json_file');
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const jsonData = JSON.parse(event.target.result);
+                if (!Array.isArray(jsonData)) {
+                    alert('JSON файлы сұрақтар массиві болуы керек');
+                    return;
+                }
+
+                const firstQuestion = jsonData[0];
+                if (!firstQuestion) return;
+
+                document.getElementById('question-text').value = firstQuestion.text || '';
+                document.getElementById('question_type').value = firstQuestion.question_type || 'checkbox';
+                toggleQuestionType();
+
+                if (firstQuestion.question_type === 'checkbox') {
+                    const optionsDiv = document.getElementById('options');
+                    optionsDiv.innerHTML = '';
+                    optionCount = 0;
+                    firstQuestion.options.forEach((option, index) => {
+                        const isCorrect = firstQuestion.correct.includes(index);
+                        addOption(option, isCorrect, index);
+                    });
+                }
+
+                if (firstQuestion.question_type === 'matching') {
+                    const matchPairsDiv = document.getElementById('match_pairs');
+                    matchPairsDiv.innerHTML = '';
+                    matchCount = 0;
+                    for (const [left, right] of Object.entries(firstQuestion.match_pairs || {})) {
+                        addMatch(left, right);
+                    }
+                }
+            } catch (e) {
+                alert('Қате JSON форматы: ' + e.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function addPromptTemplate() {
+        const promptTemplate = `Менің Flask қолданбама тест сұрақтарын қосу үшін JSON форматында сұрақтар жаса. Формат мынадай болуы керек:
+
+[
+    {
+        "text": "Сұрақ мәтіні",
+        "question_type": "checkbox",
+        "options": ["опция 1", "опция 2", ...],
+        "correct": [дұрыс опция индекстері],
+        "image": null
+    },
+    {
+        "text": "Сұрақ мәтіні",
+        "question_type": "matching",
+        "match_pairs": {"сол жақ": "оң жақ", ...},
+        "image": null
+    }
+]
+
+Мысалы, математика пәнінен 2 сұрақ жаса: 1 checkbox және 1 matching.`;
+        document.getElementById('json_text').value = promptTemplate;
     }
 </script>
 

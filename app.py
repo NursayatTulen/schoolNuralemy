@@ -1,5 +1,4 @@
 from flask import Flask, request, redirect, url_for, render_template, session, flash, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
 import json
@@ -12,7 +11,7 @@ import base64
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24).hex()
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://schoolnuralemy_db_user:n9aonkgpphoHs1EeRWHx8etZ1mItwCHD@dpg-d2lgjdbipnbc7387bbgg-a/schoolnuralemy_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -196,7 +195,136 @@ def edit_test(id):
 def add_question(test_id):
     if not session.get('logged_in'):
         return redirect(url_for('index'))
+    test = Test.query.get_or_404(test_id)
+    json_questions = None
+
     if request.method == 'POST':
+        # JSON текстін өңдеу
+        json_text = request.form.get('json_text')
+        if json_text:
+            try:
+                json_data = json.loads(json_text)
+                if not isinstance(json_data, list):
+                    flash('JSON массиві болуы керек')
+                    return redirect(url_for('add_question', test_id=test_id))
+                json_questions = json_data  # JSON сұрақтарын шаблонға жіберу
+                for q in json_data:
+                    text = q.get('text')
+                    question_type = q.get('question_type')
+                    if not text or not question_type:
+                        flash('JSON-да сұрақ мәтіні немесе түрі жоқ')
+                        return redirect(url_for('add_question', test_id=test_id))
+                    
+                    image = None
+                    if 'image' in request.files and request.files['image'].filename:
+                        file = request.files['image']
+                        filename = secure_filename(file.filename)
+                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                        image = filename
+
+                    if question_type == 'checkbox':
+                        options = q.get('options', [])
+                        correct = q.get('correct', [])
+                        if not options or not correct:
+                            flash('JSON-да нұсқалар немесе дұрыс жауаптар жоқ')
+                            return redirect(url_for('add_question', test_id=test_id))
+                        question = Question(
+                            test_id=test_id,
+                            text=text,
+                            question_type='checkbox',
+                            options=json.dumps(options),
+                            correct=json.dumps(correct),
+                            image=image
+                        )
+                    elif question_type == 'matching':
+                        match_pairs = q.get('match_pairs', {})
+                        if not match_pairs:
+                            flash('JSON-да сәйкестендіру жұптары жоқ')
+                            return redirect(url_for('add_question', test_id=test_id))
+                        question = Question(
+                            test_id=test_id,
+                            text=text,
+                            question_type='matching',
+                            match_pairs=json.dumps(match_pairs),
+                            correct=json.dumps(match_pairs),
+                            image=image
+                        )
+                    else:
+                        flash('Қате сұрақ түрі JSON-да')
+                        return redirect(url_for('add_question', test_id=test_id))
+                    
+                    db.session.add(question)
+                db.session.commit()
+                flash('JSON-дан сұрақтар сәтті қосылды')
+                return redirect(url_for('edit_test', id=test_id))
+            except json.JSONDecodeError:
+                flash('Қате JSON форматы')
+                return redirect(url_for('add_question', test_id=test_id))
+
+        # JSON файлын өңдеу
+        if 'json_file' in request.files and request.files['json_file'].filename:
+            json_file = request.files['json_file']
+            if json_file and json_file.filename.endswith('.json'):
+                try:
+                    json_data = json.load(json_file)
+                    json_questions = json_data
+                    for q in json_data:
+                        text = q.get('text')
+                        question_type = q.get('question_type')
+                        if not text or not question_type:
+                            flash('JSON файлында сұрақ мәтіні немесе түрі жоқ')
+                            return redirect(url_for('add_question', test_id=test_id))
+                        
+                        image = None
+                        if 'image' in request.files and request.files['image'].filename:
+                            file = request.files['image']
+                            filename = secure_filename(file.filename)
+                            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                            image = filename
+
+                        if question_type == 'checkbox':
+                            options = q.get('options', [])
+                            correct = q.get('correct', [])
+                            if not options or not correct:
+                                flash('JSON файлында нұсқалар немесе дұрыс жауаптар жоқ')
+                                return redirect(url_for('add_question', test_id=test_id))
+                            question = Question(
+                                test_id=test_id,
+                                text=text,
+                                question_type='checkbox',
+                                options=json.dumps(options),
+                                correct=json.dumps(correct),
+                                image=image
+                            )
+                        elif question_type == 'matching':
+                            match_pairs = q.get('match_pairs', {})
+                            if not match_pairs:
+                                flash('JSON файлында сәйкестендіру жұптары жоқ')
+                                return redirect(url_for('add_question', test_id=test_id))
+                            question = Question(
+                                test_id=test_id,
+                                text=text,
+                                question_type='matching',
+                                match_pairs=json.dumps(match_pairs),
+                                correct=json.dumps(match_pairs),
+                                image=image
+                            )
+                        else:
+                            flash('Қате сұрақ түрі JSON файлында')
+                            return redirect(url_for('add_question', test_id=test_id))
+                        
+                        db.session.add(question)
+                    db.session.commit()
+                    flash('JSON файлынан сұрақтар сәтті қосылды')
+                    return redirect(url_for('edit_test', id=test_id))
+                except json.JSONDecodeError:
+                    flash('Қате JSON форматы')
+                    return redirect(url_for('add_question', test_id=test_id))
+            else:
+                flash('JSON файлы болуы керек')
+                return redirect(url_for('add_question', test_id=test_id))
+        
+        # Қолмен сұрақ қосу
         text = request.form.get('text')
         question_type = request.form.get('question_type')
         if not text or not question_type:
@@ -238,10 +366,16 @@ def add_question(test_id):
                 correct=json.dumps(match_pairs),
                 image=image
             )
+        else:
+            flash('Қате сұрақ түрі')
+            return redirect(url_for('add_question', test_id=test_id))
+        
         db.session.add(question)
         db.session.commit()
+        flash('Сұрақ сәтті қосылды')
         return redirect(url_for('edit_test', id=test_id))
-    return render_template('add_question.html', test_id=test_id)
+    
+    return render_template('add_question.html', test_id=test_id, json_questions=json_questions)
 
 @app.route('/teacher/edit_question/<int:q_id>', methods=['GET', 'POST'])
 def edit_question(q_id):
@@ -282,6 +416,7 @@ def edit_question(q_id):
             question.correct = json.dumps(match_pairs)
             question.options = None
         db.session.commit()
+        flash('Сұрақ сәтті өзгертілді')
         return redirect(url_for('edit_test', id=question.test_id))
     if question.question_type == 'checkbox':
         options = json.loads(question.options or '[]')
@@ -301,6 +436,7 @@ def delete_question(q_id):
     test_id = question.test_id
     db.session.delete(question)
     db.session.commit()
+    flash('Сұрақ жойылды')
     return redirect(url_for('edit_test', id=test_id))
 
 @app.route('/teacher/delete/<int:id>')
@@ -310,6 +446,7 @@ def delete_test(id):
     test = Test.query.get_or_404(id)
     db.session.delete(test)
     db.session.commit()
+    flash('Тест жойылды')
     return redirect(url_for('index'))
 
 @app.route('/teacher/open/<int:id>')
@@ -321,7 +458,7 @@ def open_test(id):
     test.is_open = True
     test.opened_at = datetime.utcnow()
     test.closed_at = None
-    test.results.clear()  # Дұрысталған жол: ескі нәтижелерді тазалау
+    test.results.clear()
     db.session.commit()
     flash(f'Тест ашылды, код: {test.access_code}')
     return redirect(url_for('invite_student', id=id))
